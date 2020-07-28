@@ -30,6 +30,10 @@ export class HomePage {
       error => {});
   }
 
+  signup() {
+    this.navCtrl.push('SignupPage')
+  }
+
   ionViewDidEnter() {
     this.auth.refreshToken()
       .subscribe(response => {
