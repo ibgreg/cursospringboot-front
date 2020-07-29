@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs/Rx";
 import { StorageService } from "../services/storage.service";
 import { AlertController } from "ionic-angular";
+import { FieldMessage } from "../models/fieldmessage";
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
@@ -32,6 +33,9 @@ export class ErrorInterceptor implements HttpInterceptor {
                 case 403:
                     this.handleForbidden();
                     break;
+                case 422:
+                    this.handleUnprocessableEntity(errorObj);
+                    break;
                 default:
                     this.handleDefaultError(errorObj);
             }
@@ -56,6 +60,19 @@ export class ErrorInterceptor implements HttpInterceptor {
         alert.present();
     }
 
+    handleUnprocessableEntity(errorObj) {
+        let alert = this.alertCtrl.create({
+            title: 'Erro ao cadastrar',
+            message: this.listErrors(errorObj.errors),
+            enableBackdropDismiss: false,
+            buttons: [
+                { text: 'OK' }
+            ]
+        });
+
+        alert.present();
+    }
+
     handleDefaultError(errorObj) {
         let alert = this.alertCtrl.create({
             title: `Erro ${errorObj.status}: ${errorObj.error}`,
@@ -66,6 +83,17 @@ export class ErrorInterceptor implements HttpInterceptor {
             ]
         });
         alert.present();
+    }
+
+    private listErrors(messages : FieldMessage[]) : string {
+        let str : string = '';
+
+        for (let i = 0; i < messages.length; i++) {
+            str = str + '<p><strong>' + messages[i].fieldName + '</strong>: ' + messages[i].message + '</p>';
+            
+        }
+
+        return str;
     }
 }
 
